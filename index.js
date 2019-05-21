@@ -4,20 +4,27 @@
 
 const XHR_DONE = 4;
 
-class Producer {
+class Stream {
   constructor(xhr) {
-    this._onEnd = () => {};
+    this._callbacks = {
+      'data': null,
+      'end': null,
+    };
 
     xhr.seenBytes = 0;
 
     xhr.onreadystatechange = () => { 
       if (xhr.readyState === XHR_DONE) {
-        this._onEnd();
+        if (this._callbacks['end']) {
+          this._callbacks['end']();
+        }
       }
       else if (xhr.readyState > 2) {
         const newData = xhr.responseText.substr(xhr.seenBytes); 
 
-        this._onData(newData);
+        if (this._callbacks['data']) {
+          this._callbacks['data'](newData);
+        }
 
         xhr.seenBytes = xhr.responseText.length; 
       }
@@ -26,12 +33,17 @@ class Producer {
     xhr.send();
   }
 
-  onData(callback) {
-    this._onData = callback;
+  on(eventName, callback) {
+    if (this._callbacks[eventName] !== undefined) {
+      this._callbacks[eventName] = callback;
+    }
+    else {
+      throw new Error(`Invalid event name "${eventName}". Valid options are [${Object.keys(this._callbacks).join(', ')}]`);
+    }
   }
 
-  onEnd(callback) {
-    this._onEnd = callback;
+  off(eventName) {
+    delete this._callbacks[eventName];
   }
 }
 
@@ -46,7 +58,7 @@ function request(url, options) {
   var xhr = new XMLHttpRequest();
   xhr.open(method, url);
   
-  return new Producer(xhr);
+  return new Stream(xhr);
 }
 
 
