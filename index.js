@@ -9,12 +9,22 @@ class Stream {
     this._callbacks = {
       'data': null,
       'end': null,
+      'error': null,
+      'queue': null,
+      'exit': null,
     };
 
     xhr.seenBytes = 0;
 
     xhr.onreadystatechange = () => { 
       if (xhr.readyState === XHR_DONE) {
+        // TODO: remove this duplication
+        const newData = xhr.responseText.substr(xhr.seenBytes); 
+
+        if (this._callbacks['data']) {
+          this._callbacks['data'](newData);
+        }
+
         if (this._callbacks['end']) {
           this._callbacks['end']();
         }
@@ -30,7 +40,7 @@ class Stream {
       }
     };
 
-    xhr.send();
+    this._xhr = xhr;
   }
 
   on(eventName, callback) {
@@ -44,6 +54,10 @@ class Stream {
 
   off(eventName) {
     delete this._callbacks[eventName];
+  }
+
+  run() {
+    this._xhr.send();
   }
 }
 
