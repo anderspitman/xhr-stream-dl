@@ -6,13 +6,6 @@ const XHR_DONE = 4;
 
 class Stream {
   constructor(xhr) {
-    this._callbacks = {
-      'data': null,
-      'end': null,
-      'error': null,
-      'queue': null,
-      'exit': null,
-    };
 
     xhr.seenBytes = 0;
 
@@ -21,42 +14,40 @@ class Stream {
         // TODO: remove this duplication
         const newData = xhr.responseText.substr(xhr.seenBytes); 
 
-        if (this._callbacks['data']) {
-          this._callbacks['data'](newData);
-        }
-
-        if (this._callbacks['end']) {
-          this._callbacks['end']();
-        }
+        this._onData(newData);
+        this._onEnd();
       }
       else if (xhr.readyState > 2) {
         const newData = xhr.responseText.substr(xhr.seenBytes); 
 
-        if (this._callbacks['data']) {
-          this._callbacks['data'](newData);
-        }
+        this._onData(newData);
 
         xhr.seenBytes = xhr.responseText.length; 
       }
     };
 
     this._xhr = xhr;
+    this._started = false;
   }
 
-  on(eventName, callback) {
-    if (this._callbacks[eventName] !== undefined) {
-      this._callbacks[eventName] = callback;
+  onData(callback) {
+    if (!this._started) {
+      this._started = true;
+      this.start();
     }
-    else {
-      throw new Error(`Invalid event name "${eventName}". Valid options are [${Object.keys(this._callbacks).join(', ')}]`);
-    }
+
+    this._onData = callback;
   }
 
-  off(eventName) {
-    delete this._callbacks[eventName];
+  onEnd(callback) {
+    this._onEnd = callback;
   }
 
-  run() {
+  onError(callback) {
+    this._onError = callback;
+  }
+
+  start() {
     this._xhr.send();
   }
 }
