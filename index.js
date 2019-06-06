@@ -2,6 +2,8 @@
 // https://hpbn.co/xmlhttprequest/#streaming-data-with-xhr
 
 
+const XHR_HEADERS_RECEIVED = 2;
+const XHR_LOADING = 3;
 const XHR_DONE = 4;
 
 class Stream {
@@ -10,19 +12,34 @@ class Stream {
     xhr.seenBytes = 0;
 
     xhr.onreadystatechange = () => { 
-      if (xhr.readyState === XHR_DONE) {
-        // TODO: remove this duplication
-        const newData = xhr.responseText.substr(xhr.seenBytes); 
+      switch (xhr.readyState) {
+        //case XHR_HEADERS_RECEIVED:
+        //  if (xhr.status !== 200) {
+        //    this._onError(xhr.reponseText);
+        //  }
 
-        this._onData(newData);
-        this._onEnd();
-      }
-      else if (xhr.readyState > 2) {
-        const newData = xhr.responseText.substr(xhr.seenBytes); 
+        //  break;
+        case XHR_LOADING:
+          const newData = xhr.responseText.substr(xhr.seenBytes); 
+          this._onData(newData);
 
-        this._onData(newData);
+          xhr.seenBytes = xhr.responseText.length; 
+          break;
+        case XHR_DONE:
 
-        xhr.seenBytes = xhr.responseText.length; 
+          if (xhr.status === 200) {
+            const lastData = xhr.responseText.substr(xhr.seenBytes); 
+            this._onData(lastData);
+            this._onEnd();
+          }
+          else {
+            this._onError(xhr.responseText);
+          }
+
+          break;
+        default:
+          //console.error("Unhandle XHR code: " + xhr.readyState);
+          break;
       }
     };
 
