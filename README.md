@@ -1,4 +1,4 @@
-This is a 0-dependency implementation of the streaming mechanism described
+This is a 0-dependency, ES module-compatible implementation of the streaming mechanism described
 [here](https://hpbn.co/xmlhttprequest/#streaming-data-with-xhr) and
 shown [here](https://gist.github.com/igrigorik/5736866).
 
