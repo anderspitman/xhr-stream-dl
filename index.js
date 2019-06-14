@@ -67,6 +67,10 @@ class Stream {
   start() {
     this._xhr.send();
   }
+
+  cancel() {
+    this._xhr.abort();
+  }
 }
 
 
