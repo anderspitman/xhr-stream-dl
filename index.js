@@ -7,7 +7,9 @@ const XHR_LOADING = 3;
 const XHR_DONE = 4;
 
 class Stream {
-  constructor(xhr) {
+  constructor(xhr, body) {
+
+    this._body = body;
 
     xhr.seenBytes = 0;
 
@@ -65,7 +67,12 @@ class Stream {
   }
 
   start() {
-    this._xhr.send();
+    if (this._body) {
+      this._xhr.send(this._body);
+    }
+    else {
+      this._xhr.send();
+    }
   }
 
   cancel() {
@@ -77,14 +84,24 @@ class Stream {
 function request(url, options) {
   let method = 'GET';
 
+  let params;
+
   if (options !== undefined) {
     method = options.method ? options.method : method;
+
+    params = options.params;
   }
 
   var xhr = new XMLHttpRequest();
   xhr.open(method, url);
+
+  let body;
+  if (params) {
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    body = JSON.stringify(params);
+  }
   
-  return new Stream(xhr);
+  return new Stream(xhr, body);
 }
 
 
