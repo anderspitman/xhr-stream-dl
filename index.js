@@ -85,11 +85,14 @@ function request(url, options) {
   let method = 'GET';
 
   let params;
+  let contentType = "application/json;charset=UTF-8";
 
   if (options !== undefined) {
     method = options.method ? options.method : method;
 
     params = options.params;
+
+    contentType = options.contentType ? options.contentType : contentType;
   }
 
   var xhr = new XMLHttpRequest();
@@ -97,7 +100,7 @@ function request(url, options) {
 
   let body;
   if (params) {
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.setRequestHeader("Content-Type", contentType);
     body = JSON.stringify(params);
   }
   
