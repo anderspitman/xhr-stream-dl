@@ -30,7 +30,10 @@ class Stream {
             xhr.seenBytes = xhr.responseText.length; 
           }
           else {
-            this._onError(xhr.responseText);
+            this._onError({
+              status: xhr.status,
+              text: xhr.responseText,
+            });
           }
 
           break;
@@ -42,7 +45,10 @@ class Stream {
             this._onEnd();
           }
           else {
-            this._onError(xhr.responseText);
+            this._onError({
+              status: xhr.status,
+              text: xhr.responseText,
+            });
           }
 
           break;
